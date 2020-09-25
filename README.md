@@ -1,4 +1,4 @@
-# DNBG
->Distributed Naval Battle Game
+# DBG
+>Distributed Battleship Game
 
-### Work in progress
+#### Work in progress
