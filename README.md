@@ -13,11 +13,11 @@ O servidor será constituído por *microsserviços* que irão consumir e gerar e
 - Gerenciador de Ranking: Responsável por registrar, ordenar e filtrar os pontos dos jogadores 
 
 ### Tecnologias
-Para o gerenciamento dos eventos no modelo Publish / Subscriber será realizado pelo **Apache Kafka**
-A implementação do cliente será realizada em **Python *OU* Javascript** -> definição ainda pendente
-A implementação do servidor será realizada em **Python**
-A persistencia dos dados será feita com **MongoDB**
-O Servidor ficará hospedado em uma das plataformas: **AWS**, **DigitalOcean** ou **Google Cloud Platform**
+- Para o gerenciamento dos eventos no modelo Publish / Subscriber será realizado pelo **Apache Kafka**
+- A implementação do cliente será realizada em **Python *OU* Javascript** -> definição ainda pendente
+- A implementação do servidor será realizada em **Python**
+- A persistencia dos dados será feita com **MongoDB**
+- O Servidor ficará hospedado em uma das plataformas: **AWS**, **DigitalOcean** ou **Google Cloud Platform**
 
 ### Ilustração
 ![Arquitetura geral](/arquitetura.png)
