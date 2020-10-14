@@ -21,7 +21,7 @@ O servidor será constituído por *microsserviços* que irão consumir e gerar e
 
 ### Tecnologias
 - Para o gerenciamento dos eventos no modelo Publish / Subscriber será realizado pelo **Apache Kafka**
-- A implementação do cliente será realizada em **Python *OU* Javascript** -> definição ainda pendente
+- A implementação do cliente será realizada em **Python**
 - A implementação do servidor será realizada em **Python**
 - A persistencia dos dados será feita com **MongoDB**
 - O Servidor ficará hospedado em uma das plataformas: **AWS**, **DigitalOcean** ou **Google Cloud Platform**
@@ -61,19 +61,44 @@ Após uma jogada levar ao evento de fim de partida, os jogadores recebem esse ev
 
 ### Gerenciador de Jogadores:
 - Criar novo jogador
+    - Retorna o UUID do jogador em caso de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar jogadores online
+    - Retorna uma lista com os jogadores online
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar jogador "x"
+    - Retorna uma mensagem com os dados do jogador em casos de sucesso
+    - Retorna uma mensagem de jogador não encontrado se o jogador não existir
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Desafiar jogador
+    - Retorna uma confirmação de desafio enviado em caso de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 
 ### Gerenciador de Partidas:
 - Encontrar partida
+    - Retorna a confirmação de entrada na fila em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Iniciar partida
-- Sair da partida
+    - Retorna os dados da nova partida em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Desistir da partida
+    - Retorna a conformação da rendição em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Contabilizar Ranking
+    - Retorna a nova posição no ranking em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 
 ### Gerenciador de Ranking:
 - Atualizar Ranking
-- Buscar Ranking
+    - Retorna a lista de ranking atualizada em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
+- Buscar Ranking do jogador "x"
+    - Retorna o ranking do jogador em casos de sucesso
+    - Retorna uma mensagem de ranking não encontrado caso não exista ranking para aquele jogador
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Ordenar Ranking
+    - Retorna o ranking ordenado pela característica pedida em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
 - Filtrar Ranking
+    - Retorna o ranking com os filtros escolhidos aplicados em casos de sucesso
+    - Retorna uma mensagem com a descrição do erro em casos de falha
