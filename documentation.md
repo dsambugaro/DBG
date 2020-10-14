@@ -61,44 +61,56 @@ Após uma jogada levar ao evento de fim de partida, os jogadores recebem esse ev
 
 ### Gerenciador de Jogadores:
 - Criar novo jogador
-    - Retorna o UUID do jogador em caso de sucesso
+    - Recebe os dados do novo jogador (nome, usuário, senha) como parâmetros
+    - Retorna o código do jogador em caso de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar jogadores online
+    - Não recebe parâmetros
     - Retorna uma lista com os jogadores online
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar jogador "x"
+    - Recebe usuário ou código do jogador como parâmetro
     - Retorna uma mensagem com os dados do jogador em casos de sucesso
     - Retorna uma mensagem de jogador não encontrado se o jogador não existir
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Desafiar jogador
+    - Recebe usuário ou código do jogador como parâmetro
     - Retorna uma confirmação de desafio enviado em caso de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 
 ### Gerenciador de Partidas:
 - Encontrar partida
+    - Recebe usuário ou código do jogador como parâmetro
     - Retorna a confirmação de entrada na fila em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Iniciar partida
-    - Retorna os dados da nova partida em casos de sucesso
+    - Recebe os dados dos jogadores na partida (usuários e códigos) como parâmetros
+    - Retorna os dados da nova partida em casos de sucesso (UUID, horário de inicio)
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Desistir da partida
+    - Recebe o UUID da partida como parâmetro
     - Retorna a conformação da rendição em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Contabilizar Ranking
+    - Recebe usuário ou código do jogador e pontuação a ser adicionada como parâmetros
     - Retorna a nova posição no ranking em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 
 ### Gerenciador de Ranking:
 - Atualizar Ranking
+    - Não recebe parâmetros
     - Retorna a lista de ranking atualizada em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar Ranking do jogador "x"
+    - Recebe usuário ou código do jogador como parâmetro
     - Retorna o ranking do jogador em casos de sucesso
     - Retorna uma mensagem de ranking não encontrado caso não exista ranking para aquele jogador
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Ordenar Ranking
+    - Recebe caracterísca de ordenação e o sentido de ordenação (usuário, pontuação, asc ou desc) como parâmetros
     - Retorna o ranking ordenado pela característica pedida em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Filtrar Ranking
+    - Recebe filtros (max e min de pontuação, intervalo de datas) como parâmetros
     - Retorna o ranking com os filtros escolhidos aplicados em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
