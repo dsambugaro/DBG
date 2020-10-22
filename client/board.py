@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import string
+import random
 
 import numpy as np
 
@@ -12,6 +13,23 @@ class Board:
     """Essa classe representa um tabuleiro de batalha naval"""
     dimension = None
     control_matrix = None
+
+    ships = ['Canoa', 'Canoa', 'Canoa',
+             'Lancha', 'Lancha', 'Lancha', 'Navio']
+    ship_data = {
+        'Canoa': {
+            'size': 1,
+            'code': 3
+        },
+        'Lancha': {
+            'size': 3,
+            'code': 4
+        },
+        'Navio': {
+            'size': 5,
+            'code': 5
+        }
+    }
 
     def __init__(self, dimension):
         self.dimension = dimension
@@ -60,3 +78,53 @@ class Board:
             self.control_matrix[row_int][col_int] = 2
             return 2
         return 0
+
+    def set_ship(self, start, end, ship):
+        if start[0] == end[0]:
+            row = start[0]
+            for col in range(start[1], end[1]+1):
+                if self.control_matrix[row][col] > 0:
+                    return False
+            for col in range(start[1], end[1]+1):
+                self.control_matrix[row][col] = ship
+
+        elif start[1] == end[1]:
+            col = start[1]
+            for row in range(start[0], end[0]+1):
+                if self.control_matrix[row][col] > 0:
+                    return False
+            for row in range(start[0], end[0]+1):
+                self.control_matrix[row][col] = ship
+
+        return True
+
+    def randomize_ships(self):
+        self.control_matrix = np.zeros(
+            (self.dimension, self.dimension), dtype='int')
+
+        for ship in self.ships:
+            done = False
+            while not done:
+                rotation = random.randint(0, 1)
+                row = random.randint(0, 7)
+                col = random.randint(0, 7)
+
+                if rotation > 0:
+                    new_col = col + self.ship_data[ship]['size'] - 1
+                    if new_col < self.dimension:
+                        if self.set_ship((row, col), (row, new_col), self.ship_data[ship]['code']):
+                            done = True
+                    elif col - self.ship_data[ship]['size'] + 1 >= 0:
+                        new_col = col - self.ship_data[ship]['size'] + 1
+                        if self.set_ship((row, new_col), (row, col), self.ship_data[ship]['code']):
+                            done = True
+
+                else:
+                    new_row = row + self.ship_data[ship]['size'] - 1
+                    if new_row < self.dimension:
+                        if self.set_ship((row, col), (new_row, col), self.ship_data[ship]['code']):
+                            done = True
+                    elif row - self.ship_data[ship]['size'] + 1 >= 0:
+                        new_row = row - self.ship_data[ship]['size'] + 1
+                        if self.set_ship((new_row, col), (row, col), self.ship_data[ship]['code']):
+                            done = True
