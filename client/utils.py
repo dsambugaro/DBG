@@ -10,7 +10,7 @@ from emoji import emojize
 class Utils:
 
     @classmethod
-    def clear(self):
+    def clear(cls):
         """Limpa a janela do terminal de sistemas Windows ou Linux"""
         sys_name = platform.system()
         if sys_name == 'Windows':
@@ -19,7 +19,7 @@ class Utils:
             system('clear')
 
     @classmethod
-    def build_matrix(self, control_matrix, pretty, show_ships=True):
+    def build_matrix(cls, control_matrix, pretty, show_ships=True):
         pretty_chars = [':droplet:', ':cross_mark:',
                         ':fire:', ':canoe:', ':speedboat:', ':ship:']
         chars = ['~', 'X', 'O', 'B']
@@ -49,7 +49,7 @@ class Utils:
         return matrix
 
     @classmethod
-    def show_help(self):
+    def show_help(cls):
         Utils.clear()
         print('\n\n')
         print('* * * * * * * * * * * * * * * * * * * * AJUDA * * * * * * * * * * * * * * * * * * * *\n')
