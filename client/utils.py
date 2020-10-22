@@ -11,7 +11,7 @@ class Utils:
 
     @classmethod
     def clear(self):
-        """Limpa a janela do temrinal de sistemas Windows ou Linux"""
+        """Limpa a janela do terminal de sistemas Windows ou Linux"""
         sys_name = platform.system()
         if sys_name == 'Windows':
             system('cls')
