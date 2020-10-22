@@ -76,6 +76,7 @@ class Game:
                 continue
             op = input('Pronto para iniciar a partida (S/n): ')
             if op.strip().lower() in ['n', 'nao', 'não', 'no']:
+                Utils.clear()
                 continue
             done = True
 
