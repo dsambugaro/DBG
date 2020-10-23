@@ -9,8 +9,11 @@ class Database:
     host = 'localhost'
     port = 27017
 
+    def __init__(self):
+        self.client = MongoClient(self.host, self.port)
+
     def connect(self):
-        return MongoClient(self.host, self.port)
+        return self.client.DBG
 
     def insert(self, colection_name, data):
         db = self.connect()
