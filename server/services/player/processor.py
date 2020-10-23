@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from multiprocessing import Process
+from threading import Thread
 
 from ..handler import Handler
 
 
-class Processor(Handler, Process):
-    def __init__(self, event, data):
+class Processor(Handler, Thread):
+    def __init__(self, manager, event, data):
         super(Processor, self).__init__(event, data)
+        self.manager = manager
+
+    def ping(self, data):
+        if data == 'ping':
+            self.manager.ping()
 
     def register(self, data):
         print(data)
