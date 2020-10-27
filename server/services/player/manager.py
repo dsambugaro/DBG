@@ -18,8 +18,6 @@ class Manager(Connector, Thread):
     def processor(self, event, data):
         return Processor(self, event, data)
 
-    def on_message(self, client, userdata, msg):
-        event = msg.topic.split('/')[-1]
-        data = msg.payload.decode(self.encoding)
+    def handler(self, event, data):
         handler = self.processor(event, data)
         handler.start()
