@@ -18,7 +18,21 @@ class Processor(Handler, Thread):
             self.manager.ping()
 
     def register(self, data):
-        pass
+        username = data['_id']
+        rank = self.db.find_by_id(username)
+        if rank:
+            new_rank = rank['score'] + data['score']
+            self.db.update(username, {"$set": {"score": new_rank}})
+        else:
+            data.pop('clientUUID', None)
+            self.db.insert(data)
 
     def query(self, data):
-        pass
+        response = {
+            'code': 200,
+            'msg': 'success',
+            'result': []
+        }
+        rank = self.db.find_by_id('flame2br')
+        response['result'] = rank
+        self.manager.publish_event(data['clientUUID'], response)
