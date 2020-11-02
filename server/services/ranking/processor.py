@@ -16,11 +16,9 @@ class Processor(Handler, Thread):
     def ping(self, data):
         if data == 'ping':
             self.manager.ping()
-    
+
     def register(self, data):
         pass
 
     def query(self, data):
         pass
-
-
