@@ -35,7 +35,7 @@ class Database:
     def find_by_filter(self, filters):
         db = self.connect()
         colection = db.DBG[self.colection_name]
-        result = colection.find_one(filters)
+        result = colection.find(filters)
         db.close()
         return result
 
