@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 
-import os
 from json import loads, dumps
 
-import yaml
 import paho.mqtt.client as mqtt
 
 
