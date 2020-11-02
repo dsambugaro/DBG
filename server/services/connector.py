@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 from json import loads, dumps
 
+import yaml
 import paho.mqtt.client as mqtt
 
 
 class Connector:
 
-    encoding = 'utf-8'
-    host = 'mqtt.eclipse.org'
-    port = 1883
-    qos = 1
-
-    def __init__(self, topic):
+    def __init__(self, topic, config):
         super(Connector, self).__init__()
         self.topic = topic
         self.client = mqtt.Client()
+        self.encoding = config['encoding']
+        self.host = config['connection']['host']
+        self.port = config['connection']['port']
+        self.qos = config['connection']['QoS']
 
     def stop(self):
         self.running = False

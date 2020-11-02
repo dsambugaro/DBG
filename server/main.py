@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import yaml
 import logging as log
 from time import sleep
 
@@ -15,10 +16,13 @@ class Main:
             format='[ Servidor ][ %(levelname)s ] %(message)s', level=log_level)
 
     def start(self):
+        log.info('Carregando configurações')
+        self.config = yaml.load(
+            open('config.yaml', 'r'), Loader=yaml.FullLoader)
         log.info('Iniciando servidor')
         self.services_poll = [player, match, ranking]
         log.info('Criando instancia dos serviços')
-        self.services_poll = [service.Manager()
+        self.services_poll = [service.Manager(self.config)
                               for service in self.services_poll]
         log.info('Iniciando serviços')
         for service in self.services_poll:

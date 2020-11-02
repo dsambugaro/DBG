@@ -1,2 +1,3 @@
-pymongo
-paho-mqtt
+pymongo==3.11.0
+paho-mqtt==1.5.1
+PyYAML==5.3.1

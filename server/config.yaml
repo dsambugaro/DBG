@@ -1,0 +1,6 @@
+connection:
+    host: mqtt.eclipse.org
+    port: 1883
+    QoS: 1
+
+encoding: utf-8

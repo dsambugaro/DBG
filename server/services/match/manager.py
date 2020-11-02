@@ -13,8 +13,8 @@ class Manager(Connector, Thread):
 
     queue = []
 
-    def __init__(self, log_level=log.INFO):
-        super(Manager, self).__init__('match')
+    def __init__(self, config, log_level=log.INFO):
+        super(Manager, self).__init__('match', config)
         log.basicConfig(
             format='[ Match Service ][ %(levelname)s ] %(message)s',
             level=log_level
