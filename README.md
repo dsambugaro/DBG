@@ -3,5 +3,5 @@
 
 ##### Work in progress
 
-see documentation [here](Docs/documentation.md) (pt-br only)
+see documentation [here](docs/documentation.md) (pt-br only)
 
