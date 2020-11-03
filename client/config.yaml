@@ -1,0 +1,7 @@
+UUID: 18188b429a374c84b357edcd1c703738
+connection:
+  QoS: 1
+  host: mqtt.eclipse.org
+  port: 1883
+encoding: utf-8
+pretty: true
