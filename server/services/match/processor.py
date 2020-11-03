@@ -24,7 +24,9 @@ class Processor(Handler, Thread):
             'code': 42,
             'msg': 'match found',
             'adversary': player_two,
-            'goes_first': bool(getrandbits(1))
+            'goes_first': bool(getrandbits(1)),
+            'service': 'match',
+            'event': 'new_match'
         }
 
         response_two = response_one.copy()

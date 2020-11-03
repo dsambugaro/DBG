@@ -28,7 +28,9 @@ class Processor(Handler, Thread):
         player = self.db.find_by_id(username)
         response = {
             'msg': 'user registered',
-            'code': 201
+            'code': 201,
+            'service': 'player',
+            'event': 'register'
         }
 
         if player:
@@ -47,7 +49,9 @@ class Processor(Handler, Thread):
         player = self.db.find_by_id(username)
         response = {
             'msg': 'unauthorized',
-            'code': 401
+            'code': 401,
+            'service': 'player',
+            'event': 'login'
         }
         if player:
             pwd = hashlib.sha224(data['pwd'].encode('utf-8')).hexdigest()
@@ -61,13 +65,20 @@ class Processor(Handler, Thread):
         username = data['_id']
         player = self.db.find_by_id(username)
         response = {
-            'msg': 'User not found',
-            'code': 404
+            'msg': 'user not found',
+            'code': 404,
+            'service': 'player',
+            'event': 'info'
         }
         if player:
-            response = {
-                'username': player['_id'],
-                'name': player['display_name'],
-                'code': 200
-            }
+            response['info'] = {}
+            response['info']['username'] = player['_id']
+            response['info']['name'] = player['display_name']
+            response['info']['score'] = 0
+            response['code'] = 200
+            response['msg'] = 'user found'
+            rank_db = Database('rank')
+            rank = rank_db.find_by_id(player['_id'])
+            if rank:
+                response['info']['score'] = rank['score']
         self.manager.publish_event(data['clientUUID'], response)

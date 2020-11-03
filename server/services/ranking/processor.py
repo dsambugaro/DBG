@@ -31,7 +31,9 @@ class Processor(Handler, Thread):
         response = {
             'code': 200,
             'msg': 'success',
-            'result': []
+            'result': [],
+            'service': 'ranking',
+            'event': 'query'
         }
         rank = self.db.find_by_id('flame2br')
         response['result'] = rank

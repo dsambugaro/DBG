@@ -44,6 +44,9 @@ class Manager(Connector, Thread):
                             players['one'], players['two']
                         )
                     )
+        elif event == 'cancel_find_game':
+            if data in self.queue:
+                self.queue.remove(data)
         else:
             handler = self.processor(event, data)
             handler.start()

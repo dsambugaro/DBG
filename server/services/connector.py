@@ -20,6 +20,7 @@ class Connector:
     def stop(self):
         self.running = False
         self.client.disconnect()
+        self.client.loop_stop()
 
     def ping(self):
         self.client.publish('/DBG/{}/pong'.format(self.topic),
