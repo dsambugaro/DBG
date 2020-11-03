@@ -1,10 +1,19 @@
 #!/usr/bin/env python3
 
+import yaml
 
+from connector import Connector
 from utils import Utils
+from game import Game
 
 
-class menu:
+class Menu(Connector):
+
+    dimension = 8
+
+    def __init__(self, config):
+        super(Menu, self).__init__(config)
+        self.config = config
 
     def print_ship_art(self):
         Utils.clear()
@@ -21,110 +30,270 @@ class menu:
             '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n'
         )
 
-    def config_menu(self):
+    def config_menu(self, username, message=''):
         # Settings Function
-        self.print_ship_art()
-        print('* CONFIGURACOES *\n')
-        print('MODO PRETTY\n')
-        print('PORT/IP\n')
-        print('SAIR\n')
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+            print('* CONFIGURACOES *\n')
+            print(
+                '1 - EMOJIS -- {}\n'.format(
+                    'ON' if self.config['pretty'] else 'OFF'
+                )
+            )
+            print(
+                '2 - ENDEREÇO DO SERVIDOR -- {}\n'.format(
+                    self.config['connection']['host']
+                )
+            )
+            print(
+                '3 - PORTA DO SERVIDOR -- {}\n'.format(
+                    self.config['connection']['port']
+                )
+            )
+            print('4 - VOLTAR\n')
 
-        while True:
             command = input('--> ').strip()
-            if 'sair' == command.lower():
-                # Exit Game
-                break
+            if command.lower() in ['4', 'voltar']:
+                self.logged_in_menu(username)
+            elif command.lower() in ['1', 'emojis']:
+                try:
+                    term = 'DESATIVAR' if self.config['pretty'] else 'ATIVAR'
+                    res = input('* {} EMOJIS? (s/N) *\n'.format(term)).strip()
+                    if res.lower() in Utils.AFFIRMATIVE_ANSWER:
+                        self.config['pretty'] = not self.config['pretty']
+                        with open('config.yaml', 'w') as f:
+                            yaml.dump(self.config, f)
+                        print(
+                            '* MODO PRETTY {} *\n'.format(
+                                term.replace('R', 'DO'))
+                        )
+                except KeyboardInterrupt:
+                    pass
+                finally:
+                    self.config_menu(username)
 
-            elif 'modo pretty' == command.lower():
-                print('* ATIVAR MODO PRETTY? (TABULEIRO COM EMOJIS) *\n')
-                command = input('Y/N --> ').strip()
-                if 'y' == command.lower():
-                    # Activate pretty mode
-                    print('* MODO PRETTY ATIVADO *\n')
-                else:
-                    # Deactivate pretty mode
-                    print('* MODO PRETTY DESATIVADO *\n')
-
-            elif 'port/ip' == command.lower():
-                # PORT/IP FUNCTIONS
-                print('* DEFINICOES DE PORTA E IP *\n')
+            elif command.lower() in ['2', 'endereço', 'endereço do servidor']:
+                try:
+                    new_address = input('NOVO ENCEREÇO DO SERVIDOR: ').strip()
+                    self.config['connection']['host'] = new_address
+                    with open('config.yaml', 'w') as f:
+                        yaml.dump(self.config, f)
+                    print('ENDEREÇO DO SERVIDOR ALTERADO COM SUCESSO')
+                except KeyboardInterrupt:
+                    pass
+                finally:
+                    self.config_menu(username)
+            elif command.lower() in ['3', 'porta', 'porta do servidor']:
+                try:
+                    new_port = int(input('NOVA PORTA DO SERVIDOR: ').strip())
+                    self.config['connection']['port'] = new_port
+                    with open('config.yaml', 'w') as f:
+                        yaml.dump(self.config, f)
+                    print('PORTA DO SERVIDOR ALTERADA COM SUCESSO')
+                    self.config_menu(username)
+                except ValueError:
+                    self.config_menu(username, 'Valor inválido para porta')
+                except KeyboardInterrupt:
+                    self.config_menu(username)
 
             else:
                 # Invalid Command
-                print('\nComando inválido\n')
+                self.config_menu(username, 'Comando inválido')
+        except KeyboardInterrupt:
+            self.logged_in_menu(username)
 
-    def logged_in_menu(self):
-        self.print_ship_art()
-        print('BUSCAR JOGADOR\n')
-        print('ENCONTRAR PARTIDA\n')
-        print('CONFIGURACOES')
-        print('SAIR\n')
+    def logged_in_menu(self, username, message=''):
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+            print('1 - BUSCAR JOGADOR\n')
+            print('2 - ENCONTRAR PARTIDA\n')
+            print('3 - CONFIGURAÇÕES\n')
+            print('4 - SAIR\n')
 
-        while True:
             command = input('--> ').strip()
-            if 'sair' == command.lower():
-                # Exit Game
-                break
+            if command.lower() in ['4', 'sair']:
+                self.exit()
 
-            elif 'buscar jogador' == command.lower():
+            elif command.lower() in ['1', 'buscar jogador']:
                 # Finding player profile
-                self.print_ship_art()
-                print('* NOME DO JOGADOR *\n')
-                command = input('--> ').strip()
+                self.find_player(username)
 
-            elif 'encontrar partida' == command.lower():
-                # Matchmaking Function
-                self.print_ship_art()
-                print('* ENCONTRANDO PARTIDA *\n')
+            elif command.lower() in ['2', 'encontrar partida']:
+                self.find_match(username)
 
-            elif 'configuracoes' == command.lower():
-                self.config_menu()
+            elif command.lower() in ['3', 'configuracoes']:
+                self.config_menu(username)
 
             else:
                 # Invalid Command
-                print('\nComando inválido\n')
+                self.logged_in_menu(username, 'Comando inválido')
+        except KeyboardInterrupt:
+            self.exit()
+            self.logged_in_menu(username)
 
-    def login_menu(self):
-        self.print_ship_art()
-        print('* JOGADOR EXISTENTE *\n')
-        self.username = input('USERNAME: ').strip()
-        self.senha = input('SENHA: ').strip()
+    def find_player(self, username, message='', player=None):
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+            if player:
+                print('- - - - - - - - - - - - - - - - ')
+                print('Nome: {}'.format(player['name']))
+                print('Usuário: {}'.format(player['username']))
+                print('Pontuação: {}'.format(player['score']))
+                print('- - - - - - - - - - - - - - - - \n')
+                print('1 - BUSCAR OUTRO JOGADOR\n')
+                print('2 - VOLTAR\n')
+                res = input('--> ').strip()
+                if res.lower() in ['1', 'buscar outro jogador']:
+                    self.find_player(username)
+                elif res.lower() in ['2', 'voltar']:
+                    self.logged_in_menu(username)
+                else:
+                    self.find_player(username, 'Comando inválido', player)
+            else:
+                print('* NOME DO JOGADOR *\n')
+                username_to_find = input('--> ').strip()
+                data = {
+                    '_id': username_to_find
+                }
+                self.publish_event('player', 'info', data)
+                self.info_response = 0
+                while self.info_response == 0:
+                    Utils.show_wait_message('Realizando busca')
+                if self.info_response == 200:
+                    self.find_player(
+                        username, 'Jogador encontrado', self.info_data)
+                elif self.info_response == 404:
+                    self.find_player(username, 'Jogador não encontrado')
+                else:
+                    self.find_player(username, 'Erro desconhecido no servidor')
+        except KeyboardInterrupt:
+            self.logged_in_menu(username)
 
-        if 'USERNAME' == True and 'SENHA' == True:
-            # Database Verification
-            print('* LOG SUCCESS *\n')
-            self.logged_in_menu()
-        else:
-            print('* LOG FAILED *')
+    def find_match(self, username, message=''):
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+            data = {
+                '_id': username
+            }
+            self.publish_event('match', 'find_game', data)
+            self.find_match_response = 0
+            while self.find_match_response == 0:
+                Utils.show_wait_message('Buscando partida')
 
-    def register_menu(self):
-        self.print_ship_art()
-        print('* NOVO JOGADOR *\n')
-        self.username = input('USERNAME: ').strip()
-        self.senha = input('SENHA: ').strip()
-        # New User Function
-        self.logged_in_menu()
+            if self.find_match_response == 42:
+                self.game = Game(self.dimension, self.config, username)
+                self.game.start()
+            else:
+                self.logged_in_menu(
+                    username, 'Erro no servidor ao iniciar partida')
 
-    def main_menu(self):
-        self.print_ship_art()
-        print('REGISTRAR\n')
-        print('LOGAR\n')
-        print('SAIR\n')
+        except KeyboardInterrupt:
+            self.publish_event('match', 'cancel_find_game', data)
+            self.logged_in_menu(username, 'Busca por partida cancelada')
 
-        while True:
+    def login_menu(self, message=''):
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+            print('* DIGITE SUAS CREDENCIAIS *\n')
+            username = input('USUÁRIO: ').strip()
+            pwd = input('SENHA: ').strip()
+            data = {
+                '_id': username,
+                'pwd': pwd
+            }
+            self.publish_event('player', 'login', data)
+            self.login_response = 0
+            while self.login_response == 0:
+                Utils.show_wait_message('Realizando login')
+            if self.login_response == 200:
+                self.logged_in_menu(username)
+            elif self.login_response == 401:
+                self.login_menu('Usuário e/ou senha incorreto(s)')
+            else:
+                self.login_menu('Erro desconhecido no servidor')
+        except KeyboardInterrupt:
+            self.main_menu()
+
+    def register_menu(self, message=''):
+        try:
+            self.print_ship_art()
+            print('* NOVO JOGADOR *\n')
+            self.show_alert(message)
+            name = input('NOME: ').strip()
+            username = input('USUÁRIO: ').strip()
+            pwd = input('SENHA: ').strip()
+            data = {
+                '_id': username,
+                'display_name': name,
+                'pwd': pwd
+            }
+            self.publish_event('player', 'register', data)
+            self.register_response = 0
+            while self.register_response == 0:
+                Utils.show_wait_message('Realizando registro')
+            if self.register_response == 201:
+                self.logged_in_menu(username)
+            elif self.register_response == 406:
+                self.register_menu('Usuário já existente')
+            else:
+                self.register_menu('Erro desconhecido no servidor')
+        except KeyboardInterrupt:
+            self.main_menu()
+
+    def main_menu(self, message=''):
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+            print('1 - REGISTRAR\n')
+            print('2 - LOGAR\n')
+            print('3 - SAIR\n')
+
             command = input('--> ').strip()
-            if 'sair' == command.lower():
-                # Exit Game
-                break
+            if command.lower() in ['3', 'sair']:
+                self.exit()
 
-            elif 'registrar' == command.lower():
+            elif command.lower() in ['1', 'registrar']:
                 # Register new user
                 self.register_menu()
 
-            elif 'logar' == command.lower():
+            elif command.lower() in ['2', 'logar']:
                 # Log into account
-                self.logged_in_menu()
+                self.login_menu()
 
             else:
                 # Invalid Command
-                print('\nComando inválido\n')
+                self.main_menu('Comando inválido')
+        except KeyboardInterrupt:
+            self.exit()
+            self.main_menu()
+
+    def handler(self, data):
+        if data['service'] == 'player':
+            if data['event'] == 'register':
+                self.register_response = data['code']
+            if data['event'] == 'login':
+                self.login_response = data['code']
+            if data['event'] == 'info':
+                self.info_data = data['info']
+                self.info_response = data['code']
+
+    def exit(self):
+        res = input('\nDeseja realmente fechar o jogo? (s/N): ').strip()
+        if res.lower() in Utils.AFFIRMATIVE_ANSWER:
+            Utils.clear()
+            exit(0)
+
+    def show_alert(self, message):
+        if message:
+            print('--> {} <--\n'.format(message))
+
+    def start(self):
+        self.setup()
+        self.connect()
+        self.client.loop_start()
+        self.main_menu()

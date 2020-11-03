@@ -3,11 +3,15 @@
 
 import platform
 from os import system
+from time import sleep
 
 from emoji import emojize
 
 
 class Utils:
+
+    AFFIRMATIVE_ANSWER = ['s', 'sim', 'y', 'yes']
+    NEGATIVE_ANSWER = ['n', 'nao', 'não', 'no']
 
     @classmethod
     def clear(cls):
@@ -59,3 +63,14 @@ class Utils:
         print('\tPor exemplo: desistir')
         print('\n* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *')
         input('Pressione enter para continuar ...')
+
+    @classmethod
+    def show_wait_message(cls, message, interval=.5):
+        print('{}      '.format(message), end='\r')
+        sleep(interval)
+        print('{} .'.format(message), end='\r')
+        sleep(interval)
+        print('{} . .'.format(message), end='\r')
+        sleep(interval)
+        print('{} . . .'.format(message), end='\r')
+        sleep(interval)
