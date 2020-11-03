@@ -1,41 +1,29 @@
 #!/usr/bin/env python3
 
 
-
 import string
-from time import sleep
 
-from kafka import KafkaProducer, KafkaConsumer
-
+from connector import Connector
 from utils import Utils
 from board import Board
 
 
-class Game:
+class Game(Connector):
 
-    player_turn = True
-    running = False
-    encoding = 'utf-8'
     vertical_separator = '\t||\t'
     horizontal_separator = '------------------'
 
-    def __init__(self, dimension, pretty, username, uuid):
+    def __init__(self, dimension, config, username, adversary, player_turn):
+        super(Game, self).__init__(config)
         self.username = username
         self.dimension = dimension
-        self.pretty = pretty
-        self.uuid = uuid
+        self.adversary = adversary
+        self.player_turn = player_turn
+        self.encoding = config['encoding']
+        self.pretty = config['pretty']
+        self.uuid = config['UUID']
         self.player_board = Board(self.dimension)
         self.oponent_board = Board(self.dimension)
-        self._connect()
-
-    def _connect(self):
-        try:
-            self.producer = KafkaProducer(bootstrap_servers='localhost:1234')
-            self.consumer = KafkaConsumer(
-                '{}-{}'.format(self.uuid, self.username))
-        except Exception:
-            self.producer = None
-            self.consumer = None
 
     def _draw_col_indexes(self):
         cols = 1
@@ -70,12 +58,12 @@ class Game:
             print('')
 
             op = input('Reorganizar embarcações aleatóriamente (s/N): ')
-            if op.strip().lower() in ['s', 'y', 'sim', 'yes']:
+            if op.strip().lower() in Utils.AFFIRMATIVE_ANSWER:
                 Utils.clear()
                 self.player_board.randomize_ships()
                 continue
             op = input('Pronto para iniciar a partida (S/n): ')
-            if op.strip().lower() in ['n', 'nao', 'não', 'no']:
+            if op.strip().lower() in Utils.NEGATIVE_ANSWER:
                 Utils.clear()
                 continue
             done = True
@@ -116,29 +104,40 @@ class Game:
     def is_running(self):
         return self.running
 
-    def stop(self):
-        self.running = False
-
     def start(self):
         self.running = True
+        self.setup()
+        self.connect()
+        self.client.loop_start()
         self._run()
+
+    def handler(self, data):
+        print(data)
+        # self.oponent_board.control_matrix
 
     def _run(self):
 
+        self._set_ships()
+        self.publish_matrix(
+            self.adversary['clientUUID'], self.player_board.control_matrix)
+        print('Oponente: {}'.format(self.adversary['_id']))
+        while not self.have_adversary_ships:
+            Utils.show_wait_message(
+                'Aguardando {} posicionar os navios'.format(
+                    self.adversary['_id']
+                )
+            )
+
         while self.running:
             Utils.clear()
-            self._set_ships()
             self._draw()
 
             while not self.player_turn:
-                print('Turno do oponente      ', end='\r')
-                sleep(.5)
-                print('Turno do oponente .', end='\r')
-                sleep(.5)
-                print('Turno do oponente . .', end='\r')
-                sleep(.5)
-                print('Turno do oponente . . .', end='\r')
-                sleep(.5)
+                Utils.show_wait_message(
+                    'Turno do oponente - {}'.format(
+                        self.adversary['_id']
+                    )
+                )
 
             print('Seu turno!')
             has_played = False
@@ -157,8 +156,8 @@ class Game:
                 else:
                     if len(move) > 2:
                         print('\nJogada inválida! ', end='')
-                        print('Digite uma casa do tabuleiro no formato ', end='')
-                        print('<linha><coluna>')
+                        print('Digite uma casa do tabuleiro no ', end='')
+                        print('formato <linha><coluna>')
                         print('\tEx: A1\n')
                     elif self.producer:
                         self.producer.send(
