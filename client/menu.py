@@ -92,17 +92,105 @@ class Menu(Connector):
         except KeyboardInterrupt:
             self.logged_in_menu(username)
 
+    def find_ranking(self, username, message='', rank=None):
+        try:
+            self.print_ship_art()
+            self.show_alert(message)
+
+            if rank:
+                print('- - - - - - - - - - - - - - - - ')
+                print('Usuário\tPontuação\tData')
+                for i in range(len(rank)):
+                    print(rank['username'][i], rank['score'][i], rank['last_updated'][i])
+                print('- - - - - - - - - - - - - - - - \n')
+                print('1 - OUTRAS OPÇÕES\n')
+                print('2 - VOLTAR\n')
+                res = input('--> ').strip()
+
+                if res.lower() in ['1', 'outras opções']:
+                    self.find_ranking(username)
+                elif res.lower() in ['2', 'voltar']:
+                    self.logged_in_menu(username)
+                else:
+                    self.find_ranking(username, 'Comando inválido', rank)
+            else:
+                print('1 - BUSCAR POR JOGADOR\n')
+                print('2 - RANKING GERAL\n')
+                print('3 - NOVAS PONTUAÇÕES\n')
+                print('4 - VOLTAR\n')
+                res = input('--> ').strip()
+
+                if res.lower() in ['1', 'buscar por jogador']:
+                    #find_by_id
+                    print('* NOME DO JOGADOR *\n')
+                    id_to_find = input('--> ').strip()
+                    data = {
+                        '_id': id_to_find
+                    }
+                    self.publish_event('ranking', 'query_by_id', data)
+                    self.rank_response = 0
+
+                    while self.rank_response == 0:
+                        Utils.show_wait_message('Realizando busca')
+                    if self.rank_response == 200:
+                        self.find_ranking(username, 'Jogador encontrado', self.rank_data)
+                    elif self.rank_response == 404:
+                        self.find_ranking(username, 'Jogador não encontrado')
+                    else:
+                        self.find_ranking(username, 'Erro desconhecido no servidor')
+
+                elif res.lower() in ['2', 'ranking geral']:
+                    #find by id (high or low)
+                    print('1 - MAIORES\n')
+                    print('2 - MENORES\n')
+                    res = input('--> ').strip()
+
+                    if res.lower() in ['1', 'maiores']:
+                        data = {
+                        'order_by': 'high'
+                        }
+                    elif res.lower in ['2', 'menores']:
+                        data = {
+                        'order_by': 'low'
+                        }
+                    else:
+                        self.find_ranking(username, 'Comando inválido', rank)
+                    
+                    self.publish_event('ranking', 'query_by_id', data)
+
+                elif res.lower() in ['3', 'novas pontuações']:
+                    #find by latest updates
+                    self.publish_event('ranking', 'query_by_date', data)
+                    self.rank_response = 0
+
+                    while self.rank_response == 0:
+                        Utils.show_wait_message('Realizando busca')
+                    if self.rank_response == 200:
+                        self.find_ranking(username, 'Informações encontradas', self.rank_data)
+                    elif self.rank_response == 404:
+                        self.find_ranking(username, 'Informações não encontradas')
+                    else:
+                        self.find_ranking(username, 'Erro desconhecido no servidor')
+
+                elif res.lower() in ['4', 'voltar']:
+                    self.logged_in_menu(username)
+                else:
+                    self.find_ranking(username, 'Comando inválido', rank)
+        except KeyboardInterrupt:
+            self.logged_in_menu(username)
+
     def logged_in_menu(self, username, message=''):
         try:
             self.print_ship_art()
             self.show_alert(message)
             print('1 - BUSCAR JOGADOR\n')
             print('2 - ENCONTRAR PARTIDA\n')
-            print('3 - CONFIGURAÇÕES\n')
-            print('4 - SAIR\n')
+            print('3 - LEADERBOARDS\n')
+            print('4 - CONFIGURAÇÕES\n')
+            print('5 - SAIR\n')
 
             command = input('--> ').strip()
-            if command.lower() in ['4', 'sair']:
+            if command.lower() in ['5', 'sair']:
                 self.exit()
 
             elif command.lower() in ['1', 'buscar jogador']:
@@ -112,7 +200,10 @@ class Menu(Connector):
             elif command.lower() in ['2', 'encontrar partida']:
                 self.find_match(username)
 
-            elif command.lower() in ['3', 'configuracoes']:
+            elif command.lower() in ['3', 'leaderboards']:
+                self.find_ranking(username)
+
+            elif command.lower() in ['4', 'configuracoes']:
                 self.config_menu(username)
 
             else:
@@ -264,19 +355,27 @@ class Menu(Connector):
             self.main_menu()
 
     def handler(self, data):
-        if 'service' in data and data['service'] == 'player':
-            if data['event'] == 'register':
-                self.register_response = data['code']
-            elif data['event'] == 'login':
-                self.login_response = data['code']
-            elif data['event'] == 'info':
-                self.info_data = data['info']
-                self.info_response = data['code']
-        elif 'service' in data and data['service'] == 'match':
-            if data['event'] == 'new_match':
-                self.find_match_response = data['code']
-                self.match_adversary = data['adversary']
-                self.match_goes_first = data['goes_first']
+        if 'service' in data:
+            if data['service'] == 'player':
+                if data['event'] == 'register':
+                    self.register_response = data['code']
+                elif data['event'] == 'login':
+                    self.login_response = data['code']
+                elif data['event'] == 'info':
+                    self.info_data = data['info']
+                    self.info_response = data['code']
+            elif data['service'] == 'match':
+                if data['event'] == 'new_match':
+                    self.find_match_response = data['code']
+                    self.match_adversary = data['adversary']
+                    self.match_goes_first = data['goes_first']
+            elif data['service'] == 'ranking':
+                if data['event'] == 'query_by_id':
+                    self.rank_data = data['rank']
+                    self.rank_response = data['code']
+                if data['event'] == 'query_by_date':
+                    self.rank_data = data['rank']
+                    self.rank_response = data['code']
 
     def exit(self):
         res = input('\nDeseja realmente fechar o jogo? (s/N): ').strip()
