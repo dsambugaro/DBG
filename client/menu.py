@@ -17,18 +17,7 @@ class Menu(Connector):
 
     def print_ship_art(self):
         Utils.clear()
-        print(
-            '* * * * * * * * * * * * * BATTLESHIP * * * * * * * * * * * * *\n'
-            '                                  )___(\n'
-            '                           _______/__/_\n'
-            '                  ___     /===========|   ___\n'
-            ' ____       __   [\\\\\\]___/____________|__[///]   __\n'
-            ' \\   \\_____[\\\\]__/___________________________\\__[//]___\n'
-            '  \\                                                    |\n'
-            '   \\                                                  /\n'
-            '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n'
-            '* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n'
-        )
+        Utils.show_ship()
 
     def config_menu(self, username, message=''):
         # Settings Function
@@ -185,8 +174,10 @@ class Menu(Connector):
                 Utils.show_wait_message('Buscando partida')
 
             if self.find_match_response == 42:
-                self.game = Game(self.dimension, self.config, username)
+                self.game = Game(self.dimension, self.config, username,
+                                 self.match_adversary, self.match_goes_first)
                 self.game.start()
+                self.logged_in_menu(username, 'Partida encerrada')
             else:
                 self.logged_in_menu(
                     username, 'Erro no servidor ao iniciar partida')
@@ -273,14 +264,19 @@ class Menu(Connector):
             self.main_menu()
 
     def handler(self, data):
-        if data['service'] == 'player':
+        if 'service' in data and data['service'] == 'player':
             if data['event'] == 'register':
                 self.register_response = data['code']
-            if data['event'] == 'login':
+            elif data['event'] == 'login':
                 self.login_response = data['code']
-            if data['event'] == 'info':
+            elif data['event'] == 'info':
                 self.info_data = data['info']
                 self.info_response = data['code']
+        elif 'service' in data and data['service'] == 'match':
+            if data['event'] == 'new_match':
+                self.find_match_response = data['code']
+                self.match_adversary = data['adversary']
+                self.match_goes_first = data['goes_first']
 
     def exit(self):
         res = input('\nDeseja realmente fechar o jogo? (s/N): ').strip()
