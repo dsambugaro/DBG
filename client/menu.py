@@ -9,7 +9,7 @@ from game import Game
 
 
 class Menu(Connector):
-
+    """Essa classe representa os menus do jogo"""
     dimension = 8
 
     def __init__(self, config):
@@ -17,10 +17,15 @@ class Menu(Connector):
         self.config = config
 
     def print_ship_art(self):
+        """Imprime a arte em ASCII"""
         Utils.clear()
         Utils.show_ship()
 
     def config_menu(self, username, message=''):
+        """Menu de configurações
+        Definições de porta e endereço do servidor
+        Definições do design do jogo
+        """
         # Settings Function
         try:
             self.print_ship_art()
@@ -94,6 +99,11 @@ class Menu(Connector):
             self.logged_in_menu(username)
 
     def find_ranking(self, username, message='', ranks=None):
+        """Filtragem e seleção de ranking
+        Busca por id de usuário
+        Busca por maiores/menores scores
+        Busca por últimos socres atualizados
+        """
         try:
             self.print_ship_art()
             self.show_alert(message)
@@ -185,6 +195,11 @@ class Menu(Connector):
             self.logged_in_menu(username)
 
     def logged_in_menu(self, username, message=''):
+        """Menu de usuário logado (menu principal)
+        Inicializar Matchmaking
+        Inicializar buscas de ranking
+        Inicializar menu de configurações
+        """
         try:
             self.print_ship_art()
             self.show_alert(message)
@@ -219,6 +234,7 @@ class Menu(Connector):
             self.logged_in_menu(username)
 
     def find_player(self, username, message='', player=None):
+        """Matchmaking por id de usuário definido"""
         try:
             self.print_ship_art()
             self.show_alert(message)
@@ -258,6 +274,7 @@ class Menu(Connector):
             self.logged_in_menu(username)
 
     def find_match(self, username, message=''):
+        """Matchmaking aleatório"""
         try:
             self.print_ship_art()
             self.show_alert(message)
@@ -283,6 +300,9 @@ class Menu(Connector):
             self.logged_in_menu(username, 'Busca por partida cancelada')
 
     def login_menu(self, message=''):
+        """Menu de login
+        Redireciona para menu principal
+        """
         try:
             self.print_ship_art()
             self.show_alert(message)
@@ -307,6 +327,7 @@ class Menu(Connector):
             self.main_menu()
 
     def register_menu(self, message=''):
+        """Registro de novos jogadores"""
         try:
             self.print_ship_art()
             print('* NOVO JOGADOR *\n')
@@ -333,6 +354,9 @@ class Menu(Connector):
             self.main_menu()
 
     def main_menu(self, message=''):
+        """Menu Inicial
+        Opções de login ou registro
+        """
         try:
             self.print_ship_art()
             self.show_alert(message)
@@ -360,6 +384,11 @@ class Menu(Connector):
             self.main_menu()
 
     def handler(self, data):
+        """Lida com serviços da classe
+        Do Player (registro/login)
+        Da Partida (random ou por id)
+        Do Ranking (filtragem e seleção)
+        """
         if 'service' in data:
             if data['service'] == 'player':
                 if data['event'] == 'register':
@@ -380,12 +409,14 @@ class Menu(Connector):
                     self.rank_response = data['code']
 
     def exit(self):
+        """Função para fechar o jogo"""
         res = input('\nDeseja realmente fechar o jogo? (s/N): ').strip()
         if res.lower() in Utils.AFFIRMATIVE_ANSWER:
             Utils.clear()
             exit(0)
 
     def show_alert(self, message):
+        """Função para exibir mensagens retornadas do banco"""
         if message:
             print('--> {} <--\n'.format(message))
 
