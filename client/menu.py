@@ -152,7 +152,22 @@ class Menu(Connector):
 
                 elif res.lower() in ['2', 'ranking geral']:
                     #find by id (high or low)
-                    self.logged_in_menu(username)    
+                    print('1 - MAIORES\n')
+                    print('2 - MENORES\n')
+                    res = input('--> ').strip()
+
+                    if res.lower() in ['1', 'maiores']:
+                        data = {
+                        'order_by': 'high'
+                        }
+                    elif res.lower in ['2', 'menores']:
+                        data = {
+                        'order_by': 'low'
+                        }
+                    else:
+                        self.find_ranking(username, 'Comando inválido', rank)
+                    
+                    self.publish_event('ranking', 'query_by_id', data)
 
                 elif res.lower() in ['3', 'novas pontuações']:
                     #find by latest updates
