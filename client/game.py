@@ -223,6 +223,11 @@ class Game(Connector):
 
             if self.wins:
                 Utils.show_cup()
+                data = {
+                    '_id': self.username,
+                    'score': 5
+                }
+                self.publish_event('ranking', 'register', data)
                 input('\nPressione enter para continuar ...')
                 self.stop()
                 continue
