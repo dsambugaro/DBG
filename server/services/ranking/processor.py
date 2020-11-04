@@ -61,9 +61,9 @@ class Processor(Handler, Thread):
         }
 
         if (data['order_by']) == 'high':
-            ranks = self.db.find_by_filter('high')
+            ranks = self.db.find_by_score('high')
         else:
-            ranks = self.db.find_by_filter('low')
+            ranks = self.db.find_by_score('low')
         
         if ranks:
             response['code'] = 200
