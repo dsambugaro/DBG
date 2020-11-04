@@ -21,7 +21,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(self.board.fire(2, 1), 0)
         self.assertEqual(self.board.fire(3, 'a'), 1)
         self.assertEqual(self.board.fire(3, 'a'), 0)
-        self.assertEqual(self.board.fire(6, 7), 2)
+        self.assertEqual(self.board.fire(6, 7), 3)
 
         self.assertEqual(self.board.control_matrix[0][0], 1)
         self.assertEqual(self.board.control_matrix[2][1], 1)
@@ -42,9 +42,6 @@ class TestBoard(unittest.TestCase):
 
         with self.assertRaises(InvalidRow):
             self.board.fire('abc', 0)
-
-        with self.assertRaises(InvalidCol):
-            self.board.fire('a', 0)
 
         with self.assertRaises(InvalidCol):
             self.board.fire('a', 9)

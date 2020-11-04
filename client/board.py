@@ -4,8 +4,6 @@
 import string
 import random
 
-import numpy as np
-
 from errors import InvalidRow, InvalidCol
 
 
@@ -13,9 +11,10 @@ class Board:
     """Essa classe representa um tabuleiro de batalha naval"""
     dimension = None
     control_matrix = None
-
-    ships = ['Canoa', 'Canoa', 'Canoa',
-             'Lancha', 'Lancha', 'Lancha', 'Navio']
+    hits = 0
+    # ships = ['Canoa', 'Canoa', 'Canoa',
+    #          'Lancha', 'Lancha', 'Lancha', 'Navio']
+    ships = ['Canoa', 'Canoa']
     ship_data = {
         'Canoa': {
             'size': 1,
@@ -33,8 +32,18 @@ class Board:
 
     def __init__(self, dimension):
         self.dimension = dimension
-        self.control_matrix = np.zeros(
-            (self.dimension, self.dimension), dtype='int')
+        self.control_matrix = [
+            [
+                0 for row in range(self.dimension)
+            ]
+            for col in range(self.dimension)
+        ]
+        self.max_hits = 0
+        for ship in self.ships:
+            self.max_hits += self.ship_data[ship]['size']
+
+    def is_over(self):
+        return self.max_hits - self.hits <= 0
 
     def fire(self, row, col):
         """Realiza uma jogada no tabuleiro.
@@ -44,7 +53,9 @@ class Board:
 
         Retorna:
         1 caso tenha errado
-        2 caso tenha acertado
+        3 caso tenha acertado uma canoa
+        4 caso tenha acertado uma lancha
+        5 caso tenha acertado um navio
         0 caso a jogada seja repetida
         """
 
@@ -66,17 +77,21 @@ class Board:
         else:
             col_int = int(col)
 
-        if row_int >= self.dimension or row_int < 0:
+        if row_int+1 > self.dimension or row_int+1 < 1:
             raise InvalidRow('A linha {} está fora do tabuleiro'.format(row))
-        if col_int >= self.dimension or col_int < 0:
+        if col_int > self.dimension or col_int < 1:
             raise InvalidCol('A coluna {} está fora do tabuleiro'.format(col))
+
+        col_int -= 1
 
         if self.control_matrix[row_int][col_int] == 0:
             self.control_matrix[row_int][col_int] = 1
             return 1
         if self.control_matrix[row_int][col_int] > 2:
+            ship = self.control_matrix[row_int][col_int]
             self.control_matrix[row_int][col_int] = 2
-            return 2
+            self.hits += 1
+            return ship
         return 0
 
     def set_ship(self, start, end, ship):
@@ -99,8 +114,12 @@ class Board:
         return True
 
     def randomize_ships(self):
-        self.control_matrix = np.zeros(
-            (self.dimension, self.dimension), dtype='int')
+        self.control_matrix = [
+            [
+                0 for row in range(self.dimension)
+            ]
+            for col in range(self.dimension)
+        ]
 
         for ship in self.ships:
             done = False
