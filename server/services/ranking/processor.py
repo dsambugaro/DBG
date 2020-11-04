@@ -16,10 +16,15 @@ class Processor(Handler, Thread):
         self.db = Database('rank')
 
     def ping(self, data):
+        """Função para confirmação de conexão"""
         if data == 'ping':
             self.manager.ping()
 
     def register(self, data):
+        """Registro de ranking
+        Atualização de scores
+        Inicialização de score para novos jogadores
+        """
         username = data['_id']
         rank = self.db.find_by_id(username)
         new_time = datetime.date.today().strftime("%Y-%m-%dT00:00:0.000Z")
@@ -33,7 +38,10 @@ class Processor(Handler, Thread):
             self.db.insert(data)
 
     def query_by_id(self, data):
-        # from id like, returns ids general score
+        """Filtragem de ranking por id
+        Recebe id de usuario
+        Retorna informações de score
+        """
         response = {
             'code': 404,
             'msg': 'player not found',
@@ -53,7 +61,10 @@ class Processor(Handler, Thread):
         self.manager.publish_event(data['clientUUID'], response)
 
     def query_by_score(self, data):
-        # returns all scores ordered
+        """Filtragem de ranking por score
+        Recebe opção de ordenação (cresc. ou descres.)
+        Retorna informações de score ordenados 
+        """
         response = {
             'code': 404,
             'msg': 'ranking information not found',
@@ -75,7 +86,9 @@ class Processor(Handler, Thread):
         self.manager.publish_event(data['clientUUID'], response)
 
     def query_by_date(self, data):
-        # returns last updated scores
+        """Filtragem de ranking por últimas atualizações
+        Retorna informações de score ordenados por data
+        """
         response = {
             'code': 404,
             'msg': 'ranking information not found',
