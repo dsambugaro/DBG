@@ -3,5 +3,7 @@ connection:
   QoS: 1
   host: mqtt.eclipse.org
   port: 1883
+  username: null
+  password: null
 encoding: utf-8
 pretty: true

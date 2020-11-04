@@ -1,6 +1,7 @@
 connection:
-    host: mqtt.eclipse.org
-    port: 1883
-    QoS: 1
-
+  host: mqtt.eclipse.org
+  port: 1883
+  QoS: 1
+  username: null
+  password: null
 encoding: utf-8

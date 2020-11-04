@@ -16,6 +16,8 @@ class Connector:
         self.host = config['connection']['host']
         self.port = config['connection']['port']
         self.qos = config['connection']['QoS']
+        self.username = config['connection']['username']
+        self.pwd = config['connection']['password']
 
     def stop(self):
         self.running = False
@@ -36,6 +38,8 @@ class Connector:
         )
 
     def connect(self):
+        if self.username:
+            self.client.username_pw_set(self.username, self.pwd)
         self.client.connect(self.host, self.port)
 
     def on_connect(self, client, userdata, flags, rc):
