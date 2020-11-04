@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 import yaml
 
 from connector import Connector
@@ -92,16 +93,25 @@ class Menu(Connector):
         except KeyboardInterrupt:
             self.logged_in_menu(username)
 
-    def find_ranking(self, username, message='', rank=None):
+    def find_ranking(self, username, message='', ranks=None):
         try:
             self.print_ship_art()
             self.show_alert(message)
-
-            if rank:
+            data = {}
+            event = None
+            if ranks:
                 print('- - - - - - - - - - - - - - - - ')
-                print('Usuário\tPontuação\tData')
-                for i in range(len(rank)):
-                    print(rank['username'][i], rank['score'][i], rank['last_updated'][i])
+                print('Usuário\t\tPontuação\tData')
+                for rank in ranks:
+                    date = datetime.strptime(
+                        rank['last_updated'], "%Y-%m-%dT%H:%M:%S.%fz"
+                    ).strftime('%d/%m/%Y')
+                    print(
+                        '{}\t{}\t\t{}'.format(
+                            rank['_id'], rank['score'],
+                            date
+                        )
+                    )
                 print('- - - - - - - - - - - - - - - - \n')
                 print('1 - OUTRAS OPÇÕES\n')
                 print('2 - VOLTAR\n')
@@ -112,7 +122,9 @@ class Menu(Connector):
                 elif res.lower() in ['2', 'voltar']:
                     self.logged_in_menu(username)
                 else:
-                    self.find_ranking(username, 'Comando inválido', rank)
+                    self.find_ranking(username, 'Comando inválido', ranks)
+            elif not ranks and ranks is not None:
+                self.find_ranking(username, 'Nenhum resultado')
             else:
                 print('1 - BUSCAR POR JOGADOR\n')
                 print('2 - RANKING GERAL\n')
@@ -121,61 +133,54 @@ class Menu(Connector):
                 res = input('--> ').strip()
 
                 if res.lower() in ['1', 'buscar por jogador']:
-                    #find_by_id
+                    # find_by_id
                     print('* NOME DO JOGADOR *\n')
                     id_to_find = input('--> ').strip()
                     data = {
                         '_id': id_to_find
                     }
-                    self.publish_event('ranking', 'query_by_id', data)
-                    self.rank_response = 0
-
-                    while self.rank_response == 0:
-                        Utils.show_wait_message('Realizando busca')
-                    if self.rank_response == 200:
-                        self.find_ranking(username, 'Jogador encontrado', self.rank_data)
-                    elif self.rank_response == 404:
-                        self.find_ranking(username, 'Jogador não encontrado')
-                    else:
-                        self.find_ranking(username, 'Erro desconhecido no servidor')
+                    event = 'query_by_id'
 
                 elif res.lower() in ['2', 'ranking geral']:
-                    #find by id (high or low)
+                    # find by id (high or low)
                     print('1 - MAIORES\n')
                     print('2 - MENORES\n')
                     res = input('--> ').strip()
-
+                    event = 'query_by_score'
                     if res.lower() in ['1', 'maiores']:
                         data = {
-                        'order_by': 'high'
+                            'order_by': 'high'
                         }
-                    elif res.lower in ['2', 'menores']:
+                    elif res.lower() in ['2', 'menores']:
                         data = {
-                        'order_by': 'low'
+                            'order_by': 'low'
                         }
                     else:
-                        self.find_ranking(username, 'Comando inválido', rank)
-                    
-                    self.publish_event('ranking', 'query_by_id', data)
+                        self.find_ranking(username, 'Comando inválido', ranks)
 
                 elif res.lower() in ['3', 'novas pontuações']:
-                    #find by latest updates
-                    self.publish_event('ranking', 'query_by_date', data)
-                    self.rank_response = 0
-
-                    while self.rank_response == 0:
-                        Utils.show_wait_message('Realizando busca')
-                    if self.rank_response == 200:
-                        self.find_ranking(username, 'Informações encontradas', self.rank_data)
-                    elif self.rank_response == 404:
-                        self.find_ranking(username, 'Informações não encontradas')
-                    else:
-                        self.find_ranking(username, 'Erro desconhecido no servidor')
-
+                    data = {
+                        'order_by': 'date'
+                    }
+                    event = 'query_by_date'
                 elif res.lower() in ['4', 'voltar']:
                     self.logged_in_menu(username)
                 else:
-                    self.find_ranking(username, 'Comando inválido', rank)
+                    self.find_ranking(username, 'Comando inválido', ranks)
+
+                if data and event:
+                    self.publish_event('ranking', event, data)
+                    self.rank_response = 0
+                    while self.rank_response == 0:
+                        Utils.show_wait_message('Realizando busca')
+                    if self.rank_response == 200:
+                        self.find_ranking(
+                            username, 'Resultado', self.rank_data)
+                    elif self.rank_response == 404:
+                        self.find_ranking(username, 'Jogador não encontrado')
+                    else:
+                        self.find_ranking(
+                            username, 'Erro desconhecido no servidor')
         except KeyboardInterrupt:
             self.logged_in_menu(username)
 
@@ -370,11 +375,8 @@ class Menu(Connector):
                     self.match_adversary = data['adversary']
                     self.match_goes_first = data['goes_first']
             elif data['service'] == 'ranking':
-                if data['event'] == 'query_by_id':
-                    self.rank_data = data['rank']
-                    self.rank_response = data['code']
-                if data['event'] == 'query_by_date':
-                    self.rank_data = data['rank']
+                if data['event'] == 'query':
+                    self.rank_data = data['result']
                     self.rank_response = data['code']
 
     def exit(self):

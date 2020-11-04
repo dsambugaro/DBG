@@ -25,6 +25,13 @@ class Database:
             return colection.insert_one(data)
         db.close()
 
+    def find(self, query):
+        db = self.connect()
+        colection = db.DBG[self.colection_name]
+        result = colection.find(query)
+        db.close()
+        return result
+
     def find_by_id(self, id):
         db = self.connect()
         colection = db.DBG[self.colection_name]
@@ -33,22 +40,22 @@ class Database:
         return result
 
     def find_by_score(self, order):
-        #find scores ordered by highest or lowest
+        # find scores ordered by highest or lowest
         db = self.connect()
         colection = db.DBG[self.colection_name]
         if order == 'high':
-            result = colection.find.sort("score".DESCENDING)
+            result = colection.find().sort("score", -1)
             return result
         else:
-            result = colection.find.sort("score".ASCENDING)
+            result = colection.find().sort("score", 1)
             return result
         db.close()
 
     def find_by_latest(self):
-        #find scores ordered by latest updates
+        # find scores ordered by latest updates
         db = self.connect()
         colection = db.DBG[self.colection_name]
-        result = colection.find.sort("last_updated".DESCENDING)
+        result = colection.find().sort("last_updated", -1)
         return result
 
     def update(self, id, update_query):
