@@ -32,16 +32,10 @@ class Connector:
             dumps(data).encode(self.encoding)
         )
 
-    def publish_move(self, adversary_uuid, move):
+    def publish_match_event(self, adversary_uuid, data):
         self.publish(
             '/DBG/{}/events'.format(adversary_uuid),
-            dumps(move).encode(self.encoding)
-        )
-
-    def publish_matrix(self, adversary_uuid, matrix):
-        self.publish(
-            '/DBG/{}/events'.format(adversary_uuid),
-            dumps(matrix).encode(self.encoding)
+            dumps(data).encode(self.encoding)
         )
 
     def connect(self):
