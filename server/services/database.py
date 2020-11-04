@@ -32,11 +32,23 @@ class Database:
         db.close()
         return result
 
-    def find_by_filter(self, filters):
+    def find_by_score(self, order):
+        #find scores ordered by highest or lowest
         db = self.connect()
         colection = db.DBG[self.colection_name]
-        result = colection.find(filters)
+        if order == 'high':
+            result = colection.find.sort("score".DESCENDING)
+            return result
+        else:
+            result = colection.find.sort("score".ASCENDING)
+            return result
         db.close()
+
+    def find_by_latest(self):
+        #find scores ordered by latest updates
+        db = self.connect()
+        colection = db.DBG[self.colection_name]
+        result = colection.find.sort("last_updated".DESCENDING)
         return result
 
     def update(self, id, update_query):
