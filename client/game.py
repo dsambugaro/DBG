@@ -3,13 +3,19 @@
 
 import string
 
-from connector import Connector
 from utils import Utils
 from board import Board
+from connector import Connector
+from errors import InvalidRow, InvalidCol
 
 
 class Game(Connector):
 
+    last_result = -1
+    have_adversary_ships = False
+    oponent_gave_up = False
+    wins = False
+    loses = False
     vertical_separator = '\t||\t'
     horizontal_separator = '------------------'
 
@@ -32,41 +38,63 @@ class Game(Connector):
             print(cols, end=' ')
             cols += 1
 
+    def give_up(self):
+        answer = input('Deseja realmente desistir (s/N): ')
+        answer = answer.strip()
+        if answer.lower() in Utils.AFFIRMATIVE_ANSWER:
+            data = {
+                'code': 51,
+                'msg': 'give up',
+                'event': 'move'
+            }
+            self.publish_match_event(
+                self.adversary['clientUUID'], data
+            )
+            return True
+        return False
+
     def _set_ships(self):
         done = False
         Utils.clear()
         self.player_board.randomize_ships()
         while not done:
-            print('\n\n')
-            print('Suas embarcações: ', end='')
-            print('{}'.format(self.vertical_separator))
-            print(self.horizontal_separator, end='')
-            print(self.vertical_separator)
-            self._draw_col_indexes()
-            print(self.vertical_separator)
-            row_letter = 0
-            matrix = Utils.build_matrix(
-                self.player_board.control_matrix, self.pretty)
-            for row in matrix:
-                print(string.ascii_uppercase[row_letter], end=' ')
-                for cell in row:
-                    print(cell, end='' if self.pretty else ' ')
+            try:
+                print('\n\n')
+                print('Suas embarcações: ', end='')
+                print('{}'.format(self.vertical_separator))
+                print(self.horizontal_separator, end='')
                 print(self.vertical_separator)
-                row_letter += 1
+                self._draw_col_indexes()
+                print(self.vertical_separator)
+                row_letter = 0
+                matrix = Utils.build_matrix(
+                    self.player_board.control_matrix, self.pretty)
+                for row in matrix:
+                    print(string.ascii_uppercase[row_letter], end=' ')
+                    for cell in row:
+                        print(cell, end='' if self.pretty else ' ')
+                    print(self.vertical_separator)
+                    row_letter += 1
 
-            print('='*25)
-            print('')
+                print('='*25)
+                print('')
 
-            op = input('Reorganizar embarcações aleatóriamente (s/N): ')
-            if op.strip().lower() in Utils.AFFIRMATIVE_ANSWER:
-                Utils.clear()
-                self.player_board.randomize_ships()
-                continue
-            op = input('Pronto para iniciar a partida (S/n): ')
-            if op.strip().lower() in Utils.NEGATIVE_ANSWER:
-                Utils.clear()
-                continue
-            done = True
+                op = input('Reorganizar embarcações aleatóriamente (s/N): ')
+                if op.strip().lower() in Utils.AFFIRMATIVE_ANSWER:
+                    Utils.clear()
+                    self.player_board.randomize_ships()
+                    continue
+                op = input('Pronto para iniciar a partida (S/n): ')
+                if op.strip().lower() in Utils.NEGATIVE_ANSWER:
+                    Utils.clear()
+                    continue
+                done = True
+            except KeyboardInterrupt:
+                if self.give_up():
+                    self.stop()
+                    break
+                else:
+                    continue
 
     def _draw(self):
         player = Utils.build_matrix(
@@ -86,17 +114,15 @@ class Game(Connector):
         self._draw_col_indexes()
         print('')
 
-        row_letter = 0
-        for row in player:
-            print(string.ascii_uppercase[row_letter], end=' ')
-            for cell in row:
+        for row in range(self.dimension):
+            print(string.ascii_uppercase[row], end=' ')
+            for cell in player[row]:
                 print(cell, end='' if self.pretty else ' ')
             print(self.vertical_separator, end='')
-            print(string.ascii_uppercase[row_letter], end=' ')
-            for cell in oponent[0]:
+            print(string.ascii_uppercase[row], end=' ')
+            for cell in oponent[row]:
                 print(cell, end='' if self.pretty else ' ')
             print('')
-            row_letter += 1
 
         print('='*50)
         print('')
@@ -112,55 +138,168 @@ class Game(Connector):
         self._run()
 
     def handler(self, data):
-        print(data)
-        # self.oponent_board.control_matrix
+        if data['event'] == 'set_board':
+            if data['code'] == 13:
+                self.oponent_board.control_matrix = data['matrix']
+                self.have_adversary_ships = True
+        if data['event'] == 'move':
+            if data['code'] == 22:
+                move = data['move']
+                self.player_board.fire(move['row'], move['col'])
+                self.player_turn = True
+            elif data['code'] == 51:
+                self.oponent_gave_up = True
+                self.wins = True
 
     def _run(self):
-
         self._set_ships()
-        self.publish_matrix(
-            self.adversary['clientUUID'], self.player_board.control_matrix)
+        data = {
+            'code': 13,
+            'matrix': self.player_board.control_matrix,
+            'event': 'set_board'
+        }
+        self.publish_match_event(
+            self.adversary['clientUUID'], data
+        )
         print('Oponente: {}'.format(self.adversary['_id']))
         while not self.have_adversary_ships:
-            Utils.show_wait_message(
-                'Aguardando {} posicionar os navios'.format(
-                    self.adversary['_id']
+            try:
+                Utils.show_wait_message(
+                    'Aguardando {} posicionar os navios'.format(
+                        self.adversary['_id']
+                    )
                 )
-            )
+                if self.oponent_gave_up:
+                    break
+            except KeyboardInterrupt:
+                if self.give_up():
+                    self.stop()
+                    break
+                else:
+                    continue
 
         while self.running:
             Utils.clear()
             self._draw()
 
+            if self.last_result == 1:
+                print('\nTiro na água!\n')
+            elif self.last_result == 3:
+                print('\nAcertou uma Canoa!\n')
+            elif self.last_result == 4:
+                print('\nAcertou uma Lancha!\n')
+            elif self.last_result == 5:
+                print('\nAcertou um Navio!\n')
+            
             while not self.player_turn:
-                Utils.show_wait_message(
-                    'Turno do oponente - {}'.format(
+                try:
+                    Utils.show_wait_message(
+                        'Turno do oponente - {} - {}'.format(
+                            self.adversary['_id'], self.oponent_gave_up
+                        )
+                    )
+                    if self.oponent_gave_up:
+                        break
+                except KeyboardInterrupt:
+                    if self.give_up():
+                        self.stop()
+                        break
+                    else:
+                        continue
+
+            if self.oponent_gave_up:
+                print(
+                    ' * O oponente {} desistiu da partida * '.format(
                         self.adversary['_id']
                     )
                 )
+            
+            if self.oponent_board.is_over():
+                self.wins = True
+                self.loses = False
+            elif self.player_board.is_over():
+                self.loses = True
+                self.wins = False
+
+            if self.wins:
+                Utils.show_cup()
+                input('\nPressione enter para continuar ...')
+                self.stop()
+                continue
+
+            if self.loses:
+                Utils.show_skull()
+                input('\nPressione enter para continuar ...')
+                self.stop()
+                continue
+
+            Utils.clear()
+            self._draw()
 
             print('Seu turno!')
             has_played = False
             while not has_played:
-                move = input('Realize uma jogada (? para obter ajuda): ')
-                move = move.strip().lower()
-                if move == '?':
-                    Utils.show_help()
-                    has_played = True
-                elif move == 'desistir':
-                    answer = input('Deseja realmente desistir (s/N): ')
-                    answer = answer.strip()
-                    if answer.lower() in ['s', 'sim', 'y', 'yes']:
-                        self.stop()
+                try:
+                    move = input('Realize uma jogada (? para obter ajuda): ')
+                    move = move.strip().lower()
+                    if move == '?':
+                        Utils.show_help()
                         has_played = True
-                else:
-                    if len(move) > 2:
-                        print('\nJogada inválida! ', end='')
-                        print('Digite uma casa do tabuleiro no ', end='')
-                        print('formato <linha><coluna>')
-                        print('\tEx: A1\n')
-                    elif self.producer:
-                        self.producer.send(
-                            self.uuid, move.encode(self.encoding))
+                    elif move == 'desistir':
+                        if self.give_up():
+                            self.stop()
+                            break
+                        else:
+                            continue
                     else:
-                        has_played = True
+                        if len(move) != 2:
+                            print('\nJogada inválida! ', end='')
+                            print('Digite uma casa do tabuleiro no ', end='')
+                            print('formato <linha><coluna>')
+                            print('\tEx: A1\n')
+                        else:
+                            try:
+                                self.last_result = self.oponent_board.fire(
+                                    move[0], int(move[1])
+                                )
+                                if self.last_result > 0:
+                                    data = {
+                                        'code': 22,
+                                        'move': {
+                                            'row': move[0],
+                                            'col': int(move[1])
+                                        },
+                                        'event': 'move'
+                                    }
+                                    self.publish_match_event(
+                                        self.adversary['clientUUID'], data
+                                    )
+                                    has_played = True
+                                    self.player_turn = False
+                                else:
+                                    print('\nJogada já realizada!\n')
+                            except InvalidRow:
+                                print('\nJogada inválida! ', end='')
+                                print(
+                                    'A linha {} não existe no tabuleiro\n'.format(
+                                        move[0]
+                                    )
+                                )
+                            except InvalidCol:
+                                print('\nJogada inválida! ', end='')
+                                print(
+                                    'A coluna {} não existe no tabuleiro\n'.format(
+                                        move[1]
+                                    )
+                                )
+                            except ValueError:
+                                print('\nJogada inválida! ', end='')
+                                print('Digite uma casa do tabuleiro no ', end='')
+                                print('formato <linha><coluna>')
+                                print('\tEx: A1\n')
+                except KeyboardInterrupt:
+                    if self.give_up():
+                        self.stop()
+                        break
+                    else:
+                        continue
