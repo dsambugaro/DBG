@@ -190,22 +190,23 @@ class Game(Connector):
                 print('\nAcertou uma Lancha!\n')
             elif self.last_result == 5:
                 print('\nAcertou um Navio!\n')
-            
-            while not self.player_turn:
-                try:
-                    Utils.show_wait_message(
-                        'Turno do oponente - {} - {}'.format(
-                            self.adversary['_id'], self.oponent_gave_up
+
+            if not self.oponent_board.is_over():
+                while not self.player_turn:
+                    try:
+                        Utils.show_wait_message(
+                            'Turno do oponente - {} - {}'.format(
+                                self.adversary['_id'], self.oponent_gave_up
+                            )
                         )
-                    )
-                    if self.oponent_gave_up:
-                        break
-                except KeyboardInterrupt:
-                    if self.give_up():
-                        self.stop()
-                        break
-                    else:
-                        continue
+                        if self.oponent_gave_up:
+                            break
+                    except KeyboardInterrupt:
+                        if self.give_up():
+                            self.stop()
+                            break
+                        else:
+                            continue
 
             if self.oponent_gave_up:
                 print(
@@ -213,7 +214,7 @@ class Game(Connector):
                         self.adversary['_id']
                     )
                 )
-            
+
             if self.oponent_board.is_over():
                 self.wins = True
                 self.loses = False
