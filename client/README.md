@@ -28,7 +28,6 @@ $ python main.py
 Arquivo de configuração:
 
 ```YAML
-connection:
 UUID: null
 connection:
   QoS: 1
