@@ -104,3 +104,10 @@ Após uma jogada levar ao evento de fim de partida, os jogadores recebem esse ev
 - Buscar ultimas atualizações
     - Retorna o ranking ordenado de forma descrescente pelos valores de data da última atualização
     - Retorna uma mensagem com a descrição do erro em casos de falha
+
+
+-------
+
+Informações para execução do cliente podem ser encontrada [aqui](../client/README.md)
+
+Informações para execução do servidor podem ser encontrada [aqui](../server/README.md)
