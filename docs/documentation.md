@@ -20,7 +20,7 @@ O servidor será constituído por *microsserviços* que irão consumir e gerar e
 - Gerenciador de Ranking: Responsável por registrar, ordenar e filtrar os pontos dos jogadores 
 
 ### Tecnologias
-- Para o gerenciamento dos eventos no modelo Publish / Subscriber será realizado pelo **Apache Kafka**
+- Para o gerenciamento dos eventos no modelo Publish / Subscriber será realizado pelo **RabbitMQ**
 - A implementação do cliente será realizada em **Python**
 - A implementação do servidor será realizada em **Python**
 - A persistencia dos dados será feita com **MongoDB**
@@ -41,7 +41,7 @@ Diagrama da etapa 1:
 
 * **Etapa 2**: Os jogadores posicionam suas embarcações, quando ambos tiveram finalizado essa terefa a partida se inicia.
 
-    Cada jogador ao finalizar de posicionar suas embarcações gera um evento de embarcações posicionadas, o processo de partida aguarda receber o evento de ambos os jogadores, escolhe aleatóriamente um jogador para jogar primeiro e gera um evento de partida iniciada que indica aos jogadores o inicio do jogo.
+    Cada jogador ao finalizar de posicionar suas embarcações gera um evento de embarcações posicionadas, esse evento é publicado para o jogador oponente. O processo de partida aguarda receber o evento de ambos os jogadores, escolhe aleatóriamente um jogador para jogar primeiro e gera um evento de partida iniciada que indica aos jogadores o inicio do jogo.
 
 Diagrama da etapa 2:
 ![Etapa 2 do fluxo do jogo](img/2.png)
