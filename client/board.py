@@ -12,9 +12,8 @@ class Board:
     dimension = None
     control_matrix = None
     hits = 0
-    # ships = ['Canoa', 'Canoa', 'Canoa',
-    #          'Lancha', 'Lancha', 'Lancha', 'Navio']
-    ships = ['Canoa', 'Canoa']
+    ships = ['Canoa', 'Canoa', 'Canoa',
+             'Lancha', 'Lancha', 'Lancha', 'Navio']
     ship_data = {
         'Canoa': {
             'size': 1,

@@ -1,4 +1,4 @@
-UUID: 18188b429a374c84b357edcd1c703738
+UUID:
 connection:
   QoS: 1
   host: mqtt.eclipse.org
