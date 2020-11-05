@@ -14,7 +14,7 @@ paho-mqtt==1.5.1
 PyYAML==5.3.1
 ```
 
-Para instalar as dependencias:
+Para instalar as dependências:
 
 ```bash
 $ pip install -r requeriments.txt
