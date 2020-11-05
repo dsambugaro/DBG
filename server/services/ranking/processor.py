@@ -35,6 +35,7 @@ class Processor(Handler, Thread):
                 username, {"$set": {"score": new_rank, "last_updated": new_time}})
         else:
             data.pop('clientUUID', None)
+            data['last_updated'] = new_time
             self.db.insert(data)
 
     def query_by_id(self, data):

@@ -223,6 +223,7 @@ class Game(Connector):
                 self.wins = False
 
             if self.wins:
+                print('* VITÓRIA *')
                 Utils.show_cup()
                 data = {
                     '_id': self.username,
@@ -234,6 +235,7 @@ class Game(Connector):
                 continue
 
             if self.loses:
+                print('* DERROTA *')
                 Utils.show_skull()
                 input('\nPressione enter para continuar ...')
                 self.stop()

@@ -187,7 +187,7 @@ class Menu(Connector):
                         self.find_ranking(
                             username, 'Resultado', self.rank_data)
                     elif self.rank_response == 404:
-                        self.find_ranking(username, 'Jogador não encontrado')
+                        self.find_ranking(username, 'Sem resultados')
                     else:
                         self.find_ranking(
                             username, 'Erro desconhecido no servidor')
@@ -205,7 +205,7 @@ class Menu(Connector):
             self.show_alert(message)
             print('1 - BUSCAR JOGADOR\n')
             print('2 - ENCONTRAR PARTIDA\n')
-            print('3 - LEADERBOARDS\n')
+            print('3 - RANKING\n')
             print('4 - CONFIGURAÇÕES\n')
             print('5 - SAIR\n')
 
@@ -220,7 +220,7 @@ class Menu(Connector):
             elif command.lower() in ['2', 'encontrar partida']:
                 self.find_match(username)
 
-            elif command.lower() in ['3', 'leaderboards']:
+            elif command.lower() in ['3', 'ranking']:
                 self.find_ranking(username)
 
             elif command.lower() in ['4', 'configuracoes']:
