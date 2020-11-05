@@ -41,14 +41,14 @@ Diagrama da etapa 1:
 
 * **Etapa 2**: Os jogadores posicionam suas embarcações, quando ambos tiveram finalizado essa terefa a partida se inicia.
 
-    Cada jogador ao finalizar de posicionar suas embarcações gera um evento de embarcações posicionadas, esse evento é publicado para o jogador oponente. O processo de partida aguarda receber o evento de ambos os jogadores, escolhe aleatóriamente um jogador para jogar primeiro e gera um evento de partida iniciada que indica aos jogadores o inicio do jogo.
+    Cada jogador ao finalizar de posicionar suas embarcações gera um evento de embarcações posicionadas, esse evento é publicado para o jogador oponente. Quando ambos os jogadores tiverem recebido o evento de que seu oponente posicionou o tabuleiro, o jogo se inicia.
 
 Diagrama da etapa 2:
 ![Etapa 2 do fluxo do jogo](img/2.png)
 
-* **Etapa 3**: Os jogadores realizam suas jogadas alternadamente, as jogadas são processadas pelo servidor e o resultado delas são enviadas para os jogadores.
+* **Etapa 3**: Os jogadores realizam suas jogadas alternadamente, as jogadas enviadas para o oponente.
 
-    Ao realizar uma jogada o jogador gera um evento de jogada realizada. A partida processa a jogada e retorna o resultado dela para ambos os jogadores. Esse processo se repete, com cada joghador realziando a jogada de forma alternada, até o fim da partida.
+    Ao realizar uma jogada válida o jogador gera um evento de jogada realizada. Esse evento é enviado para o oponente para ele atualizar seu tabuleiro. Esse processo se repete, com cada jogador realziando a jogada de forma alternada, até o fim da partida.
 
 Diagrama da etapa 3:
 ![Etapa 3 do fluxo do jogo](img/3.png)
@@ -62,25 +62,21 @@ Após uma jogada levar ao evento de fim de partida, os jogadores recebem esse ev
 ### Gerenciador de Jogadores:
 - Criar novo jogador
     - Recebe os dados do novo jogador (nome, usuário, senha) como parâmetros
-    - Retorna o código do jogador em caso de sucesso
+    - Retorna uma mensagem de sucesso caso o jogador seja registrado
     - Retorna uma mensagem com a descrição do erro em casos de falha
-- Buscar jogadores online
-    - Não recebe parâmetros
-    - Retorna uma lista com os jogadores online
+- Logar
+    - Recebe os dados de login do jogador (usuário, senha) como parâmetros
+    - Retorna uma mensagem de sucesso caso as credencias estavam corretas
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar jogador "x"
-    - Recebe usuário ou código do jogador como parâmetro
+    - Recebe usuário do jogador como parâmetro
     - Retorna uma mensagem com os dados do jogador em casos de sucesso
     - Retorna uma mensagem de jogador não encontrado se o jogador não existir
-    - Retorna uma mensagem com a descrição do erro em casos de falha
-- Desafiar jogador
-    - Recebe usuário ou código do jogador como parâmetro
-    - Retorna uma confirmação de desafio enviado em caso de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 
 ### Gerenciador de Partidas:
 - Encontrar partida
-    - Recebe usuário ou código do jogador como parâmetro
+    - Recebe usuário do jogador como parâmetro
     - Retorna a confirmação de entrada na fila em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Iniciar partida
@@ -92,25 +88,19 @@ Após uma jogada levar ao evento de fim de partida, os jogadores recebem esse ev
     - Retorna a conformação da rendição em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Contabilizar Ranking
-    - Recebe usuário ou código do jogador e pontuação a ser adicionada como parâmetros
-    - Retorna a nova posição no ranking em casos de sucesso
+    - Recebe usuário do jogador e pontuação a ser adicionada como parâmetros
+    - Retorna uma mensagem de sucesso caso a pontuação tenha sido atualizada
     - Retorna uma mensagem com a descrição do erro em casos de falha
 
 ### Gerenciador de Ranking:
-- Atualizar Ranking
-    - Não recebe parâmetros
-    - Retorna a lista de ranking atualizada em casos de sucesso
+- Listar Ranking
+    - Recebe uma string informando a ordem de ordenação
+    - Retorna a lista de ranking atualizada ordenada por pontuação na ordem solicitada em casos de sucesso
     - Retorna uma mensagem com a descrição do erro em casos de falha
 - Buscar Ranking do jogador "x"
-    - Recebe usuário ou código do jogador como parâmetro
-    - Retorna o ranking do jogador em casos de sucesso
-    - Retorna uma mensagem de ranking não encontrado caso não exista ranking para aquele jogador
+    - Recebe uma string como parâmetro
+    - Retorna uma lista de rankings de jogadres que contem essa string no usuário
     - Retorna uma mensagem com a descrição do erro em casos de falha
-- Ordenar Ranking
-    - Recebe caracterísca de ordenação e o sentido de ordenação (usuário, pontuação, asc ou desc) como parâmetros
-    - Retorna o ranking ordenado pela característica pedida em casos de sucesso
-    - Retorna uma mensagem com a descrição do erro em casos de falha
-- Filtrar Ranking
-    - Recebe filtros (max e min de pontuação, intervalo de datas) como parâmetros
-    - Retorna o ranking com os filtros escolhidos aplicados em casos de sucesso
+- Buscar ultimas atualizações
+    - Retorna o ranking ordenado de forma descrescente pelos valores de data da última atualização
     - Retorna uma mensagem com a descrição do erro em casos de falha
